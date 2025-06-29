@@ -31,7 +31,6 @@ export const App = () => {
 
 
   const onSubmit = async (data) => {
-    try {
       console.log(data, "form data's");
       // dispatch + unwrap to catch success/failure
       console.log(edit, "edit.state?????????????");
@@ -46,10 +45,6 @@ export const App = () => {
         toast.success("User added successfully");
         reset();
       }
-    } catch (error) {
-
-    }
-
   }
   const handleEdit = (user) => {
     console.log(user, "handleEdit");
