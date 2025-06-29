@@ -2,10 +2,11 @@ const userModel = require("../models/User");
 //get users by server side pagination
 const GetUser = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
+        let page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit
         const { searchTerm } = req.query
+        console.log(searchTerm, "searchTerm>>>>>>>>>>.");
+
         let query = {}
         if (searchTerm) {
             query = {
@@ -17,18 +18,23 @@ const GetUser = async (req, res) => {
                 ]
             }
         }
-
+        const total = await userModel.countDocuments(query)
+        const totalPages = Math.ceil(total / limit)
+         // ✅ Auto-fix invalid page numbers
+        if (page > totalPages && totalPages > 0) {
+            page = 1;
+        }
+        const skip = (page - 1) * limit
         const allUsers = await userModel.find(query).skip(skip).limit(limit);
-        const total = await userModel.countDocuments()
 
         if (allUsers.length === 0) {
-            return res.status(200).json({ message: "No users found",code:404 });
+            return res.status(200).json({ message: "No users found", code: 404 });
         }
         res.status(200).json({
             data: allUsers,
             total,
             page,
-            totalPages: Math.ceil(total / limit)
+            totalPages,
         });
     } catch (error) {
         console.error("Error fetching user:", error);
