@@ -11,5 +11,6 @@ export const ApiList = {
     addUser: "/addUser",
     getUser:"/user",
     updateUser: "/user",
-    deleteUser:"/user"
+    deleteUser:"/user",
+    exportUsers:"/exportUsers"
 }

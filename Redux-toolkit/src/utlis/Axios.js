@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://crudappproject007.onrender.com/api',
+  baseURL: 'http://localhost:5000/api',
+  // baseURL: 'https://crudappproject007.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },

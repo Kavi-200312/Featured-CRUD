@@ -5,17 +5,29 @@ import { increment, decrement } from './features/posts/PostSlice';
 import { useForm } from 'react-hook-form';
 import { DevTool } from '@hookform/devtools';
 import { useEffect, useState } from 'react';
-import { addUsers, deleteUser, fetchUser, updateUser } from './features/user/UserAPI';
+import { addUsers, deleteUser, exportUser, fetchUser, updateUser } from './features/user/UserAPI';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from "react-paginate"
+import { CSVLink } from "react-csv"
+import { setCurrentPageUsers, setExportLoading, setExportType } from './features/user/UserSlice';
 let count = 0
 
 export const App = () => {
   const dispatch = useDispatch()
-  const { users, page, totalPages } = useSelector((state) => state.users)
+  const { users, page, totalPages, export: { exportData, exportType, exportLoading } } = useSelector((state) => state.users)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedTerm, setDebouncedTerm] = useState("")
+  const [selectedType, setSelectedType] = useState("")
+
+  const headers = [
+    { label: "Name", key: "name" },
+    { label: "Email", key: "email" },
+    { label: "Phone", key: "phone" },
+    { label: "Address", key: "address" },
+    { label: "Created At", key: "createdAt" },
+  ];
+
 
   console.log(users, "users>>>>>>>>>>>>>>");
   const {
@@ -29,22 +41,55 @@ export const App = () => {
 
   const [edit, setEdit] = useState({ state: false, id: "" })
 
+  const handleExport = async (e) => {
+    const type = e.target.value
+    setSelectedType(type)
+    dispatch(setExportType(type))
+    if (type === "current") {
+      dispatch(setCurrentPageUsers(users))
+    } else {
+      dispatch(setExportLoading(true))
+      try {
+        const response = await dispatch(exportUser({
+          searchTerm,
+          exportType: type,
+        })).unwrap();
+
+      } catch (err) {
+        console.error("Export failed", err);
+      } finally {
+        dispatch(setExportLoading(false))
+      }
+    }
+  };
+
+
+  // useEffect(() => {
+  //   dispatch(setCurrentPageUsers(users))
+  // if (exportData.length > 0 && csvRef.current) {
+  //   setTimeout(() => {
+  //     csvRef.current.link.click();
+  //   }, 100);
+  // }
+  // }, []);
+  console.log(exportData, "exportData=========================>");
+  console.log(users, "users");
 
   const onSubmit = async (data) => {
-      console.log(data, "form data's");
-      // dispatch + unwrap to catch success/failure
-      console.log(edit, "edit.state?????????????");
+    console.log(data, "form data's");
+    // dispatch + unwrap to catch success/failure
+    console.log(edit, "edit.state?????????????");
 
-      if (edit.state) {
-        const response = await dispatch(updateUser({ userinfo: data, id: edit.id })).unwrap();
-        toast.success("User update successfully");
-        setEdit({})
-        reset();
-      } else {
-        const response = await dispatch(addUsers(data)).unwrap();
-        toast.success("User added successfully");
-        reset();
-      }
+    if (edit.state) {
+      const response = await dispatch(updateUser({ userinfo: data, id: edit.id })).unwrap();
+      toast.success("User update successfully");
+      setEdit({})
+      reset();
+    } else {
+      const response = await dispatch(addUsers(data)).unwrap();
+      toast.success("User added successfully");
+      reset();
+    }
   }
   const handleEdit = (user) => {
     console.log(user, "handleEdit");
@@ -164,7 +209,6 @@ export const App = () => {
               }}>Cancel</div>}
             </div>
           </form>
-          <DevTool control={control} />
         </div>
 
         <div className="user-table-container">
@@ -177,6 +221,40 @@ export const App = () => {
                 setSearchTerm(e.target.value)
               }}
             />
+            <div>
+
+              <select onChange={handleExport} defaultValue="">
+                <option value="" disabled>Select Export Option</option>
+                <option value="current">Export Current Page</option>
+                {searchTerm !== "" && <option value="filtered">Export Filtered Items</option>}
+                <option value="all">Export All</option>
+              </select>
+
+              <CSVLink
+                data={exportData}
+                headers={headers}
+                onClick={(e) => {
+                  if (selectedType !== "") {
+                    return true;
+                  } else {
+                    toast.error("Please select the export option");
+                    return false;
+                  }
+                }}
+                filename="users_export.csv"
+                className={`export-btn ${exportLoading ? "loading" : ""}`}
+                target="_blank"
+              >
+                {exportLoading ? (
+                  <span className="spinner"></span>
+                ) : (
+                  "Export"
+                )}
+              </CSVLink>
+
+            </div>
+
+
           </div>
           <table className="user-table">
             <thead>
@@ -242,24 +320,6 @@ export const App = () => {
 
 
       <Toaster />
-      {/* <p>{counter}</p>
-      <button onClick={() => {dispatch(increment())}}>increment</button>
-      <button onClick={() => {dispatch(decrement())}}>decrement</button>
-      {loading && <h1>Loading...</h1>}
-      <form>
-        in
-      </form>
-      <div>
-        {posts && posts.length !== 0 ?(posts.map((item)=>{
-
-          return(
-          <div></div>
-        )
-        }
-        
-        )):(<>No data found</>)}
-        </div> */}
-
     </div>
   )
 }

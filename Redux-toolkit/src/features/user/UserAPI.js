@@ -16,13 +16,25 @@ export const addUsers = createAsyncThunk("users/addUser", async (userinfo, { rej
 })
 
 
-export const fetchUser = createAsyncThunk("user/fetchUser", async ({ page, limit ,searchTerm}, { rejectWithValue }) => {
+export const exportUser = createAsyncThunk("user/exportUser",
+    async ({ searchTerm, exportType }, { rejectWithValue }) => {
+        try {
+            const exportedUsers = await apiClient
+                .get(`${ApiList.exportUsers}?searchTerm=${searchTerm}&exportType=${exportType}`)
+            return exportedUsers
+        } catch (error) {
+            console.log(error, "exportedUsers....................");
+            toast.error(error?.data?.message || "Failed to export Users")
+            return rejectWithValue(error)
+        }
+    })
+export const fetchUser = createAsyncThunk("user/fetchUser", async ({ page, limit, searchTerm }, { rejectWithValue }) => {
     try {
         const allUsers = await apiClient.get(`${ApiList.getUser}?page=${page}&limit=${limit}&searchTerm=${searchTerm}`)
         return allUsers
     } catch (error) {
-         console.log(error , "FETCHuSER....................");
-         toast.error(error?.data?.message || "Failed to fetch user")
+        console.log(error, "FETCHuSER....................");
+        toast.error(error?.data?.message || "Failed to fetch user")
         return rejectWithValue(error)
     }
 })
@@ -30,12 +42,12 @@ export const fetchUser = createAsyncThunk("user/fetchUser", async ({ page, limit
 
 export const updateUser = createAsyncThunk("user/updateUser", async ({ userinfo, id }, { rejectWithValue }) => {
     try {
-        console.log(userinfo, id ,"userinfo, id========================================");
-        
+        console.log(userinfo, id, "userinfo, id========================================");
+
         const updatedUser = await apiClient.put(`${ApiList.updateUser}/${id}`, userinfo)
         return updatedUser
     } catch (error) {
-         toast.error(error?.data?.message || "Failed to update user. Please try again.")
+        toast.error(error?.data?.message || "Failed to update user. Please try again.")
         return rejectWithValue(error)
     }
 })
@@ -44,7 +56,7 @@ export const deleteUser = createAsyncThunk("user/deleteUser", async (id, { rejec
         const deletedUser = await apiClient.delete(`${ApiList.deleteUser}/${id}`)
         return deletedUser
     } catch (error) {
-         toast.error(error?.data?.message || "Failed to delete user. Please try again.")
+        toast.error(error?.data?.message || "Failed to delete user. Please try again.")
         return rejectWithValue(error)
     }
 })

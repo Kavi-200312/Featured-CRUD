@@ -34,6 +34,7 @@
   width: 65%;
   overflow-x: auto;
   padding: 20px;
+
 }
 
 section {
@@ -41,7 +42,7 @@ section {
 }
 
 .user-table {
-  width: 90%;
+  width: 100%;
   min-width: fit-content;
   margin: 0 auto;
   border-collapse: collapse;
@@ -102,7 +103,7 @@ section {
   text-align: center;
   color: #888;
   padding: 20px;
-  
+
 }
 
 
@@ -235,8 +236,11 @@ button[type='submit']:hover {
 
 .search-container {
   /* border: 1px solid; */
-  margin: 0 0 20px 45px;
+  /* margin: 0 0 20px 45px; */
+  margin-bottom: 20px;
   text-align: left;
+  display: flex;
+  justify-content: space-between;
 }
 
 .search-input {
@@ -245,4 +249,70 @@ button[type='submit']:hover {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+select {
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 3px rgba(0, 123, 255, 0.4);
+}
+
+select option {
+  background-color: #fff;
+  color: #333;
+  padding: 10px;
+}
+.export-btn {
+  margin-left: 10px;
+  background-color: #007bff;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  transition: opacity 0.2s ease;
+}
+
+.export-btn.loading {
+  background-color: #6c757d; /* gray out */
+  cursor: not-allowed;
+  pointer-events: none; /* prevent click */
+  opacity: 0.8;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ffffff;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
