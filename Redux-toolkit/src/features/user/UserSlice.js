@@ -1,5 +1,6 @@
 import { createSlice, current } from "@reduxjs/toolkit"
 import { addUsers, deleteUser, exportUser, fetchUser, updateUser } from "./UserAPI";
+import { DynamicHeaders } from "../../utlis/commonFunc";
 
 const initialState = {
     users: [],
@@ -7,6 +8,10 @@ const initialState = {
         exportData: [],
         exportType: "current",
         exportLoading: false,
+        exportHeaders :[]
+    },
+    actions: {
+        edit: { state: false ,id:"", data: {} }
     },
     page: 1,
     totalPages: 1,
@@ -27,18 +32,26 @@ const UserSlice = createSlice({
         },
         setExportLoading: (state, action) => {
             state.export.exportLoading = action.payload
+        },
+        setEdit: (state, action) => {
+            state.actions.edit = action.payload
+        },
+        setPage :(state,action)=>{
+            state.page = action.payload
         }
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchUser.fulfilled, (state, action) => {
-                const response = action.payload.data
+                const response = action.payload
                 if (response.code !== 404) {
                     state.users = response.data
                     state.page = response.page
                     state.totalPages = response.totalPages
 
-                     state.export.exportData = response.data
+                    //export
+                    state.export.exportData = response.data
+                    state.export.exportHeaders = DynamicHeaders(response.data)
                 } else {
                     state.users = []
                     state.page = 1
@@ -47,15 +60,15 @@ const UserSlice = createSlice({
 
             })
             .addCase(exportUser.fulfilled, (state, action) => {
-                state.export.exportData = action.payload.data
+                state.export.exportData = action.payload
             })
             .addCase(addUsers.fulfilled, (state, action) => {
                 if (state.users.length < 10) {
-                    state.users = [...state.users, action.payload.data]
+                    state.users = [...state.users, action.payload]
                 }
             })
             .addCase(updateUser.fulfilled, (state, action) => {
-                let updated = action.payload.data
+                let updated = action.payload
                 const index = state.users.findIndex((user) => user?._id === updated?._id)
 
                 if (index !== -1) {
@@ -63,11 +76,11 @@ const UserSlice = createSlice({
                 }
             })
             .addCase(deleteUser.fulfilled, (state, action) => {
-                const deletedUserId = action.payload.data.id
+                const deletedUserId = action.payload.id
                 state.users = state.users.filter((user) => user._id !== deletedUserId)
             })
     }
 
 })
-export const { setExportType, setCurrentPageUsers, setExportLoading } = UserSlice.actions
+export const { setExportType, setCurrentPageUsers, setExportLoading, setEdit ,setPage} = UserSlice.actions
 export default UserSlice.reducer;

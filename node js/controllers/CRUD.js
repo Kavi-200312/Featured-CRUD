@@ -26,7 +26,7 @@ const GetUser = async (req, res) => {
             page = 1;
         }
         const skip = (page - 1) * limit
-        const allUsers = await userModel.find(query).skip(skip).limit(limit);
+        const allUsers = await userModel.find(query).skip(skip).limit(limit).select("-id -__v");
 
         if (allUsers.length === 0) {
             return res.status(200).json({ message: "No users found", code: 404 });
@@ -73,7 +73,7 @@ const exportUsers = async (req, res) => {
 
         const users = await userModel
             .find(query)
-            .select("name email phone address createdAt")
+            .select("-id -__v")
             .lean();
 
         if (!users || users.length === 0) {
